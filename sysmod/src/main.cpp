@@ -1,7 +1,6 @@
 #include <cstring>
 #include <span>
 #include <algorithm> // for std::min
-#include <bit> // for std::byteswap
 #include <utility> // std::unreachable
 #include <switch.h>
 #include "minIni/minIni.h"
