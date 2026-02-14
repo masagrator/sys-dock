@@ -164,6 +164,13 @@ all: $(BUILD)
 $(BUILD):
 	@[ -d $@ ] || mkdir -p $@
 	@$(MAKE) --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile
+# Doing it in one line results in wrong output on Arch Linux
+	@echo "{" > toolbox.json
+	@echo "    \"name\": \"sys-dock\"," >> toolbox.json
+	@echo "    \"tid\": \"42000000000000A0\"," >> toolbox.json
+	@echo "    \"requires_reboot\": false," >> toolbox.json
+	@echo "    \"version\": \"$(VERSION)\"" >> toolbox.json
+	@echo "}" >> toolbox.json
 
 	@rm -rf out/
 	@mkdir -p out/atmosphere/contents/42000000000000A0/flags
