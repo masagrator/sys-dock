@@ -26,7 +26,7 @@ A Nintendo Switch system module that patches various things to allow you to incr
 
 | Resolution | Mode                                        |
 | ---------- | ------------------------------------------- |
-| 1080p75    | HBR x2 (default on OLED)                    |
+| 1080p75    | HBR x2 (default on OLED with OLED dock)     |
 | 1080p120   | HBR2 x2 or HBR x4                           |
 | 1080p240   | HBR2 x4                                     |
 
