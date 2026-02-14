@@ -1,6 +1,6 @@
 # sys-dock
 
-A system module that patches various things to allow you to increase your docked display bandwidth for higher refresh rate.
+A Nintendo Switch system module that patches various things to allow you to increase your docked display bandwidth for higher refresh rate.
 
 > [!WARNING]
 > This sysmodule changes how your connection with dock works. It may have unexpected results that can damage hardware. Contributors of this repository are not taking any responsibility for damage resulted from using this software.
