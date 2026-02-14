@@ -1,0 +1,5 @@
+{
+    "name"  : "sys-dock",
+    "tid"   : "42000000000000A0",
+    "requires_reboot": false
+}
