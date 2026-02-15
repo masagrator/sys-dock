@@ -8,10 +8,10 @@ extern "C" {
 
 ///OperationModePolicy
 typedef enum {
-    ommOperationModePolicy_Auto       = 0,
-    ommOperationModePolicy_Handheld   = 1,
-    ommOperationModePolicy_Console    = 2
-} ommOperationModePolicy;
+    OmmOperationModePolicy_Auto       = 0,
+    OmmOperationModePolicy_Handheld   = 1,
+    OmmOperationModePolicy_Console    = 2
+} OmmOperationModePolicy;
 
 /// Initialize pwm.
 Result ommInitialize(void);
@@ -29,7 +29,7 @@ Result ommGetDefaultDisplayResolution(s32* width, s32* height);
 Result ommGetOperationMode(AppletOperationMode* s);
 
 /// Takes an ommOperationModePolicy. Only available on [3.0.0+].
-Result ommSetOperationModePolicy(ommOperationModePolicy value);
+Result ommSetOperationModePolicy(OmmOperationModePolicy value);
 
 #ifdef __cplusplus
 } // extern "C"
