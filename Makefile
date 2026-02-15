@@ -1,7 +1,7 @@
 MAKEFILES	:=	sysmod overlay
 TARGETS		:= $(foreach dir,$(MAKEFILES),$(CURDIR)/$(dir))
 
-export VERSION := 1.0.0
+export VERSION := 1.0.1
 
 ifneq ($(strip $(shell git symbolic-ref --short HEAD 2>/dev/null)),)
 export GIT_BRANCH := $(shell git symbolic-ref --short HEAD)
