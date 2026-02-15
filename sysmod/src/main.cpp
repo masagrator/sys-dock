@@ -4,6 +4,7 @@
 #include <utility> // std::unreachable
 #include <switch.h>
 #include "minIni/minIni.h"
+#include "omm.h"
 
 namespace {
 
