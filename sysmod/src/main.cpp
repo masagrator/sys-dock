@@ -230,6 +230,25 @@ auto is_emummc() -> bool {
     return (paths.unk[0] != '\0') || (paths.nintendo[0] != '\0');
 }
 
+auto is_process_running(u64 title_id) -> bool {
+    u64 pids[0x50]{};
+    s32 process_count{};
+
+    if (R_FAILED(svcGetProcessList(&process_count, pids, 0x50))) {
+        return false;
+    }
+
+    for (s32 i = 0; i < process_count; i++) {
+        u64 tid;
+        if (R_SUCCEEDED(pmdmntGetProgramId(&tid, pids[i])) &&
+            tid == title_id) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 void patcher(Handle handle, const u8* data, size_t data_size, u64 addr, std::span<Patterns> patterns) {
     for (auto& p : patterns) {
         // skip if disabled (controller by config.ini)
@@ -546,12 +565,45 @@ int main(int argc, char* argv[]) {
     bool any_patch_applied = false;
     if (enable_patching) {
         for (auto& patch : patches) {
-            any_patch_applied |= apply_patch(patch);
+            apply_patch(patch);
         }
     }
 
-    if (any_patch_applied) {
-        /***/
+    const auto ticks_end = armGetSystemTick();
+    const auto diff_ns = armTicksToNs(ticks_end) - armTicksToNs(ticks_start);
+
+    bool any_patched = false;
+    bool retrained = false;
+    if (enable_patching) {
+        for (auto& patch : patches) {
+            for (auto& p : patch.patterns) {
+                if (p.result == PatchResult::PATCHED_SYSDOCK) {
+                    any_patched = true;
+                    break;
+                }
+            }
+            if (any_patched) break;
+        }
+    }
+
+    constexpr u64 QLAUNCH_TID = 0x0100000000001000;
+    if (any_patched) {
+        for (int i = 0; i < 100; i++) { // poll up to 10s
+            if (is_process_running(QLAUNCH_TID)) {
+                break;
+            }
+            svcSleepThread(100000000ULL); // 100ms
+        }
+
+        svcSleepThread(1000000000ULL); // 1s
+
+        AppletOperationMode mode{};
+        if (R_SUCCEEDED(ommGetOperationMode(&mode)) && mode == AppletOperationMode_Console) {
+            // force DP link to re-train by toggling it off and on
+            ommSetOperationModePolicy(OmmOperationModePolicy_Handheld);
+            ommSetOperationModePolicy(OmmOperationModePolicy_Auto);
+            retrained = true;
+        }
     }
 
     const auto ticks_end = armGetSystemTick();
@@ -601,6 +653,7 @@ int main(int argc, char* argv[]) {
         ini_putl("stats", "heap_size", INNER_HEAP_SIZE, log_path);
         ini_putl("stats", "buffer_size", READ_BUFFER_SIZE, log_path);
         ini_puts("stats", "patch_time", patch_time, log_path);
+        ini_putl("stats", "dp_retrained", retrained, log_path);
     }
 
     // note: sysmod exits here.
