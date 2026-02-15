@@ -664,6 +664,9 @@ void __appInit(void) {
     if (R_FAILED(rc = pmdmntInitialize()))
         fatalThrow(rc);
 
+    if (R_FAILED(rc = ommInitialize()))
+        fatalThrow(rc);
+
     // Close the service manager session.
     smExit();
 }
@@ -672,5 +675,6 @@ void __appInit(void) {
 void __appExit(void) {
     pmdmntExit();
     fsExit();
+    ommExit();
 }
 } // extern "C"
