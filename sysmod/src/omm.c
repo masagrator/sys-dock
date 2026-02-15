@@ -46,7 +46,7 @@ Result ommGetOperationMode(AppletOperationMode* s) {
     return rc;
 }
 
-Result ommSetOperationModePolicy(ommOperationModePolicy value) { //[3.0.0+]
+Result ommSetOperationModePolicy(OmmOperationModePolicy value) { //[3.0.0+]
     u8 tmp = value;
     return serviceDispatchIn(&g_ommSrv, 10, tmp);
 }

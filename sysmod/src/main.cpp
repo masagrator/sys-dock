@@ -562,7 +562,6 @@ int main(int argc, char* argv[]) {
     // speedtest
     const auto ticks_start = armGetSystemTick();
 
-    bool any_patch_applied = false;
     if (enable_patching) {
         for (auto& patch : patches) {
             apply_patch(patch);
@@ -605,9 +604,6 @@ int main(int argc, char* argv[]) {
             retrained = true;
         }
     }
-
-    const auto ticks_end = armGetSystemTick();
-    const auto diff_ns = armTicksToNs(ticks_end) - armTicksToNs(ticks_start);
 
     if (enable_logging) {
         for (auto& patch : patches) {
