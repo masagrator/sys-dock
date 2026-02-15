@@ -10,12 +10,12 @@
 	"is_retail":	true,
 	"pool_partition":	2,
 	"is_64_bit":	true,
-	"address_space_type":	1,
+	"address_space_type":	3,
 	"filesystem_access":	{
 		"permissions":	"0xffffffffffffffff"
 	},
 	"service_access":	["*"],
-	"service_host":	["patch"],
+	"service_host":	["*"],
 	"kernel_capabilities":	[{
 			"type":	"kernel_flags",
 			"value":	{
