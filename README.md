@@ -34,10 +34,10 @@ A Nintendo Switch system module that patches various things to allow you to incr
 
 | Name               | Description                                                  |
 | ------------------ | ------------------------------------------------------------ |
-| no_lane_downgrade  | Disables 4 -> 2 DP lane downgrade for all models.<br />- Unlocks **HBR x4** if `force_bw_downgrade` is also enabled.<br />- Otherwise unlocks **HBR2 x4**.<br />NOTE: Rebooting while docked will default to 2 lanes, re-dock to switch to 4. |
 | no_bw_downgrade    | Disables HBR2 (5.4gbps) -> HBR (2.7gbps) DP bandwidth downgrade when 2 DP lanes on OLED models. All other cases use full bandwidth.<br />- Unlocks **HBR2 x2** on OLED. |
-| force_bw_downgrade | Forces HBR2 (5.4gbps) -> HBR (2.7gbps) DP bandwidth downgrade.<br />- Unlocks **HBR x4** if `no_lane_downgrade` is also enabled. |
+| no_lane_downgrade  | Disables 4 -> 2 DP lane downgrade for all models.<br />- Unlocks **HBR x4** if `force_bw_downgrade` is also enabled.<br />- Otherwise unlocks **HBR2 x4**.<br />NOTE: Rebooting while docked will default to 2 lanes, re-dock to switch to 4. |
 | force_dp_mode_c    | Forces DP pin mode C, even if not advertised as supported by your hub. This can enable 4 DP lanes on 3rd party hubs that emulate a non-OLED dock, but still support pin mode C under the hood. |
+| force_bw_downgrade | Forces HBR2 (5.4gbps) -> HBR (2.7gbps) DP bandwidth downgrade.<br />- Unlocks **HBR x4** if `no_lane_downgrade` is also enabled. |
 
 ## Config
 
