@@ -543,10 +543,15 @@ int main(int argc, char* argv[]) {
     // speedtest
     const auto ticks_start = armGetSystemTick();
 
+    bool any_patch_applied = false;
     if (enable_patching) {
         for (auto& patch : patches) {
-            apply_patch(patch);
+            any_patch_applied |= apply_patch(patch);
         }
+    }
+
+    if (any_patch_applied) {
+        /***/
     }
 
     const auto ticks_end = armGetSystemTick();
