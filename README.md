@@ -14,12 +14,12 @@ First, install this system module by extracting the release ZIP at the root of y
 
 ### OLED Switch Only
 
-Use the "sys-dock" overlay to enable patches, trying each step until 120Hz works in FPSLocker:
-1. Enable `no_bw_downgrade` patch, reboot, then try FPSLocker again.
-2. Didn't work? Also enable `no_lane_downgrade`.
-3. Still didn't work and using a 3rd party dock? Also enable `force_dp_mode_c`.
-4. Still didn't work? Enable `force_bw_downgrade` (this automatically disables `no_bw_downgrade` if active).
-
+  Use the "sys-dock" overlay to enable patches, trying each step until 120Hz works in FPSLocker:
+  1. Enable `no_bw_downgrade` patch, reboot, then try FPSLocker again.
+  2. Didn't work? Also enable `no_lane_downgrade`.
+  3. Still didn't work and using a 3rd party dock? Also enable `force_dp_mode_c`.
+  4. Still didn't work? Enable `force_bw_downgrade` (this automatically disables `no_bw_downgrade` if active).
+  
 > [!NOTE]
 > While up to 240Hz is theoretically possible on the OLED Switch, it is not enabled in FPSLocker due to high risk of crashing at system applets.
 
