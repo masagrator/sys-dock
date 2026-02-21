@@ -8,7 +8,7 @@ A Nintendo Switch system module that patches the docked DisplayPort link trainin
 ## Simple Guide
 
 > [!TIP]
-> To activate any high refresh rate, you need to install [FPSLocker](https://github.com/masagrator/FPSLocker). Go to `FPSLocker > Display settings > Docked Settings`. By default, OLED Switches are limited to 75Hz, while non-OLED Switches are limited to 120Hz. The OLED limit can be unlocked up to 240Hz by using this sysmodule.
+> To activate any high refresh rate, you need to install [FPSLocker](https://github.com/masagrator/FPSLocker). Go to `FPSLocker > Display settings > Docked Settings`. By default, at 1080p OLED Switches are limited to 75Hz, while non-OLED Switches are limited to 120Hz. The OLED limit can be unlocked up to 240Hz by using this sysmodule.
 
 First, install this system module by extracting the release ZIP at the root of your SD card.
 
