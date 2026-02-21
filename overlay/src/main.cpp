@@ -137,11 +137,10 @@ public:
         return frame;
     }
 
-    Toggle nvservices_toggles[4]{
+    Toggle nvservices_toggles[3]{
         {{"nvservices", "no_lane_downgrade", false}},
         {{"nvservices", "no_bw_downgrade", false, 0}},
         {{"nvservices", "force_bw_downgrade", false, 0}},
-        {{"nvservices", "force_full_render_pass", false}},
     };
 
     Toggle usb_toggles[1]{
