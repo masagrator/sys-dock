@@ -4,7 +4,6 @@
 #include <utility> // std::unreachable
 #include <switch.h>
 #include "minIni/minIni.h"
-#include "omm.h"
 
 namespace {
 
@@ -141,24 +140,32 @@ constexpr auto bcond_or_tbnz_cond(u32 inst) -> bool {
     return bcond_cond(inst) || tbnz_cond(inst);
 }
 
+constexpr auto bic_w8_w8_wm_lsr2_cond(u32 inst) -> bool {
+    // wildcard only Rm (bits 20..16)
+    return (inst & 0xFFE0FFFFu) == 0x0A600908u; // BIC w8, w8, Rm, lsr #2
+}
+
 // to view patches, use https://armconverter.com/?lock=arm64
 constexpr PatchData nop_patch_data{ "0x1F2003D5" };
 constexpr PatchData nop5_patch_data{ "0x1F2003D51F2003D51F2003D51F2003D51F2003D5" };
 constexpr PatchData nop6_patch_data{ "0x1F2003D51F2003D51F2003D51F2003D51F2003D51F2003D5" };
 constexpr PatchData mov_w9_0x406_patch_data{ "0xC9808052" };
 constexpr PatchData mov_w20_0x406_patch_data{ "0xD4808052" };
+constexpr PatchData mov_w8_2_patch_data{ "0x48008052" };
 
 constexpr auto nop_patch(u32 inst) -> PatchData { return nop_patch_data; }
 constexpr auto nop5_patch(u32 inst) -> PatchData { return nop5_patch_data; }
 constexpr auto nop6_patch(u32 inst) -> PatchData { return nop6_patch_data; }
 constexpr auto mov_w9_0x406_patch(u32 inst) -> PatchData { return mov_w9_0x406_patch_data; }
 constexpr auto mov_w20_0x406_patch(u32 inst) -> PatchData { return mov_w20_0x406_patch_data; }
+constexpr auto mov_w8_2_patch(u32 inst) -> PatchData { return mov_w8_2_patch_data; }
 
 constexpr auto nop_applied(const u8* data, u32 inst) -> bool { return nop_patch(inst).cmp(data); }
 constexpr auto nop5_applied(const u8* data, u32 inst) -> bool { return nop5_patch(inst).cmp(data); }
 constexpr auto nop6_applied(const u8* data, u32 inst) -> bool { return nop6_patch(inst).cmp(data); }
 constexpr auto mov_w9_0x406_applied(const u8* data, u32 inst) -> bool { return mov_w9_0x406_patch(inst).cmp(data); }
 constexpr auto mov_w20_0x406_applied(const u8* data, u32 inst) -> bool { return mov_w20_0x406_patch(inst).cmp(data); }
+constexpr auto mov_w8_2_applied(const u8* data, u32 inst) -> bool { return mov_w8_2_patch(inst).cmp(data); }
 
 
 constinit Patterns nvservices_patterns[] = {
@@ -188,6 +195,12 @@ constinit Patterns nvservices_patterns[] = {
     { "no_bw_downgrade", "no_bw_downgrade", "0x.....018052.e60c39..0c91..0c91", 8, 0, strb_cond, nop_patch, nop_applied, false, 0, MAKEHOSVERSION(11,0,0), FW_VER_ANY},
     // same pattern as above, except we nop the B.NE and force the STRB
     { "force_bw_downgrade", "force_bw_downgrade", "0x.....018052.e60c39..0c91..0c91", 0, 0, bcond_or_tbnz_cond, nop_patch, nop_applied, false, 0, MAKEHOSVERSION(11,0,0), FW_VER_ANY},
+    // 28 00 80 52  MOV     W8, #1
+    // 08 09 79 0A  BIC     W8, W8, W25, LSR#2      <-- MOV W8, #2
+    { "11.0.0-14.1.2 force_full_render_pass", "force_full_render_pass", "0x280080520809.0A", 4, 0, bic_w8_w8_wm_lsr2_cond, mov_w8_2_patch, mov_w8_2_applied, false, -1, MAKEHOSVERSION(11,0,0), MAKEHOSVERSION(14,1,2) },
+    // 08 09 79 0A  BIC     W8, W8, W25, LSR#2      <-- MOV W8, #2
+    // E0 03 1A AA  MOV     X0, X26
+    { "15.0.0+ force_full_render_pass", "force_full_render_pass", "0x0809.0AE003.AA", 0, 0, bic_w8_w8_wm_lsr2_cond, mov_w8_2_patch, mov_w8_2_applied, false, -1, MAKEHOSVERSION(15,0,0), FW_VER_ANY },
 };
 
 constinit Patterns usb_patterns[] = {
@@ -228,25 +241,6 @@ auto is_emummc() -> bool {
     EmummcPaths paths{};
     smcAmsGetEmunandConfig(&paths);
     return (paths.unk[0] != '\0') || (paths.nintendo[0] != '\0');
-}
-
-auto is_process_running(u64 title_id) -> bool {
-    u64 pids[0x50]{};
-    s32 process_count{};
-
-    if (R_FAILED(svcGetProcessList(&process_count, pids, 0x50))) {
-        return false;
-    }
-
-    for (s32 i = 0; i < process_count; i++) {
-        u64 tid;
-        if (R_SUCCEEDED(pmdmntGetProgramId(&tid, pids[i])) &&
-            tid == title_id) {
-            return true;
-        }
-    }
-
-    return false;
 }
 
 void patcher(Handle handle, const u8* data, size_t data_size, u64 addr, std::span<Patterns> patterns) {
@@ -307,7 +301,7 @@ void patcher(Handle handle, const u8* data, size_t data_size, u64 addr, std::spa
                     // move onto next pattern
                     break;
                 } else if (p.applied(data + inst_offset + p.patch_offset, inst)) {
-                    // patch already applied by sigpatches
+                    // patch already applied by some other software
                     p.result = PatchResult::PATCHED_FILE;
                     break;
                 }
@@ -571,40 +565,6 @@ int main(int argc, char* argv[]) {
     const auto ticks_end = armGetSystemTick();
     const auto diff_ns = armTicksToNs(ticks_end) - armTicksToNs(ticks_start);
 
-    bool any_patched = false;
-    bool retrained = false;
-    if (enable_patching) {
-        for (auto& patch : patches) {
-            for (auto& p : patch.patterns) {
-                if (p.result == PatchResult::PATCHED_SYSDOCK) {
-                    any_patched = true;
-                    break;
-                }
-            }
-            if (any_patched) break;
-        }
-    }
-
-    constexpr u64 QLAUNCH_TID = 0x0100000000001000;
-    if (any_patched) {
-        for (int i = 0; i < 100; i++) { // poll up to 10s
-            if (is_process_running(QLAUNCH_TID)) {
-                break;
-            }
-            svcSleepThread(100000000ULL); // 100ms
-        }
-
-        svcSleepThread(1000000000ULL); // 1s
-
-        AppletOperationMode mode{};
-        if (R_SUCCEEDED(ommGetOperationMode(&mode)) && mode == AppletOperationMode_Console) {
-            // force DP link to re-train by toggling it off and on
-            ommSetOperationModePolicy(OmmOperationModePolicy_Handheld);
-            ommSetOperationModePolicy(OmmOperationModePolicy_Auto);
-            retrained = true;
-        }
-    }
-
     if (enable_logging) {
         for (auto& patch : patches) {
             for (auto& p : patch.patterns) {
@@ -649,7 +609,6 @@ int main(int argc, char* argv[]) {
         ini_putl("stats", "heap_size", INNER_HEAP_SIZE, log_path);
         ini_putl("stats", "buffer_size", READ_BUFFER_SIZE, log_path);
         ini_puts("stats", "patch_time", patch_time, log_path);
-        ini_putl("stats", "dp_retrained", retrained, log_path);
     }
 
     // note: sysmod exits here.
@@ -718,9 +677,6 @@ void __appInit(void) {
     if (R_FAILED(rc = pmdmntInitialize()))
         fatalThrow(rc);
 
-    if (R_FAILED(rc = ommInitialize()))
-        fatalThrow(rc);
-
     // Close the service manager session.
     smExit();
 }
@@ -729,6 +685,5 @@ void __appInit(void) {
 void __appExit(void) {
     pmdmntExit();
     fsExit();
-    ommExit();
 }
 } // extern "C"
