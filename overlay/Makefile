@@ -38,7 +38,6 @@ include $(DEVKITPRO)/libnx/switch_rules
 #   NACP building is skipped as well.
 #---------------------------------------------------------------------------------
 APP_TITLE	:=	sys-dock
-APP_AUTHOR	:=	TotalJustice
 APP_VERSION :=	$(VERSION_DIRTY)
 
 TARGET		:=	sys-dock-overlay
