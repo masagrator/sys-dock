@@ -673,17 +673,12 @@ void __appInit(void) {
     if (R_FAILED(rc = fsInitialize()))
         fatalThrow(rc);
 
-    // Add other services you want to use here.
-    if (R_FAILED(rc = pmdmntInitialize()))
-        fatalThrow(rc);
-
     // Close the service manager session.
     smExit();
 }
 
 // Service deinitialization.
 void __appExit(void) {
-    pmdmntExit();
     fsExit();
 }
 } // extern "C"
